@@ -1,9 +1,5 @@
-/**
- * Created by Angeleyes on 7/14/2015.
- */
-
-import scala.util.control.Breaks._
-import MathHelper._
+import Classes.MathHelper._
+import MathHelper.MatrixImpl._
 
 class Descent {
 
@@ -31,7 +27,7 @@ class Descent {
 
   def GenerateTrainingSet(size:Int, num_features: Int):(Row, Matrix) = {
     val Xmat: Matrix = GenerateIndependentFeatures(size, num_features) T
-//    val theta: Row = List.fill(num_features+1)(2)
+    //    val theta: Row = List.fill(num_features+1)(2)
     val theta: Row = List.tabulate(num_features+1)(n => n + 2)
     (GenerateDependentFeatures(size, Xmat, theta), Xmat )
   }
@@ -51,10 +47,10 @@ class Descent {
     var i:Int = 0
     while(i < num_features){
       derivatives(i) = X(i).zip(distance).map{t:(Double, Double) => t._1 * t._2}.sum/size
-//      derivatives(i) = X(i).sum * distance(i) / size
+      //      derivatives(i) = X(i).sum * distance(i) / size
       i = i + 1
     }
-//    println(distance)
+    //    println(distance)
     derivatives.toList
   }
 
@@ -79,7 +75,8 @@ class Descent {
     var theta: Array[Double]  = Array.fill(num_features+1){0.0}
     var (cost_func_last: Double, num_iter, alpha, m) = (0.0, 0, 0.000000003, size)
     var index: Int = 0
-    breakable( while(true){
+    var converged: Boolean = false
+    while(!converged){
       num_iter += 1
       //get cost function and partial derivatives
       val (cost_func, partial_derive) = PartialDerivativesAndCost(size, theta.toList, i_var, d_var)
@@ -87,21 +84,21 @@ class Descent {
       //theta = theta_old - alpha * partial_derivative
       val zippedList  = theta.zip(partial_derive).toList
       theta = zippedList.map{t: (Double, Double) => t._1 - (alpha * t._2)}.toArray
-//      theta(0) = zippedList.head._1 - (alpha * 10 * zippedList.head._2)
-//      theta(1) = zippedList.head._1 - (alpha * zippedList.head._2)
-//      theta(2) = zippedList.head._1 - (alpha * 0.01 * zippedList.head._2)
-//      theta(3) = zippedList.head._1 - (alpha * 0.001 * zippedList.head._2)
-//      theta(4) = zippedList.head._1 - (alpha * 0.0001 * zippedList.head._2)
+      //      theta(0) = zippedList.head._1 - (alpha * 10 * zippedList.head._2)
+      //      theta(1) = zippedList.head._1 - (alpha * zippedList.head._2)
+      //      theta(2) = zippedList.head._1 - (alpha * 0.01 * zippedList.head._2)
+      //      theta(3) = zippedList.head._1 - (alpha * 0.001 * zippedList.head._2)
+      //      theta(4) = zippedList.head._1 - (alpha * 0.0001 * zippedList.head._2)
       println(theta.toList)
       println("-------")
       println(cost_func)
       if(cost_func > cost_func_last)
         alpha = alpha / 10
       if (cost_func < 0.000001)
-        break
+        converged = true
       cost_func_last = cost_func
-//      println(math.abs(cost_func - cost_func_last))
-    })
+      //      println(math.abs(cost_func - cost_func_last))
+    }
     theta.toList
   }
 
@@ -121,7 +118,7 @@ class Descent {
     result
   }
 
-  def main(args: Array[String]) {
+  def GetToWork() {
     val size: Int = 300
     val num_features: Int = 4
     val (y: Row, x: Matrix) = GenerateTrainingSet(size, num_features)
@@ -129,10 +126,16 @@ class Descent {
     println(y)
     println("------X--------")
     println(x)
-//    val scaledFeatures = ScaleFeatures(x.T, num_features)
+    //        val scaledFeatures = ScaleFeatures(x.T, num_features)
     val theta: List[Double] = GradientDescent(x, y, size, num_features)
     println("Output")
     println(theta)
   }
+}
 
+object Descent {
+  def main(args: Array[String]) {
+    val starter = new Descent()
+    starter.GetToWork()
+  }
 }
