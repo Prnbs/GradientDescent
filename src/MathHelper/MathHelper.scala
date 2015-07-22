@@ -3,7 +3,7 @@ package MathHelper
 /**
  * Created by Angeleyes on 7/20/2015.
  */
-import Classes.MathHelper._
+import Classes.MathHelperTypedefs._
 
 class MatrixImpl(m: Matrix){
   val data: Matrix = m

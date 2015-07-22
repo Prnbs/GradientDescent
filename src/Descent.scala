@@ -1,59 +1,46 @@
-import Classes.MathHelper._
+import Classes.MathHelperTypedefs._
 import MathHelper.MatrixImpl._
+import Trainees.TrainingDataGen
 
-class Descent {
+trait GradientDescentAPI{
+  def fit(DataFrame: Matrix, size: Int, numFeatures: Int): Row
+  def predict(Input: Row, theta: Row): Double
+}
 
-  def GenerateIndependentFeatures(size: Int, num_features: Int): Matrix = {
-    var i: Int = 1
-    var result: Matrix = List(List.fill(size)(1))
-    while(i <= num_features)
-    {
-      result = result ::: List(List.tabulate(size)(n=> (n+n*i+i).toDouble))
-      i = i + 1
-    }
-    result
+
+class GradientDescent extends GradientDescentAPI{
+
+  def fit(DataFrame: Matrix, size: Int, numFeatures: Int): Row ={
+    GradientDescent(DataFrame.tail, DataFrame.head, size, numFeatures)
   }
 
-  def GenerateDependentFeatures(size:Int, X: Matrix, Theta: Row): Row = {
-    var Y: Row = List()
-    var i: Int = 0
-    while(i < size)
-    {
-      Y = Y ::: List(dotProd(Theta, X(i)))
-      i = i + 1
-    }
-    Y
-  }
-
-  def GenerateTrainingSet(size:Int, num_features: Int):(Row, Matrix) = {
-    val Xmat: Matrix = GenerateIndependentFeatures(size, num_features) T
-    //    val theta: Row = List.fill(num_features+1)(2)
-    val theta: Row = List.tabulate(num_features+1)(n => n + 2)
-    (GenerateDependentFeatures(size, Xmat, theta), Xmat )
+  def predict(Input: Row, theta: Row): Double ={
+    dotProd(theta, Input)
   }
 
   /*
     h(x) =  c + m1 x1 + m2 x2 + m3 x3 + ...
    */
   def HypothesisLinear(size: Int, theta: Row, X: Matrix): Row = {
-    GenerateDependentFeatures(size, X, theta)
+    var Y: Row = List()
+    var i: Int = 0
+    while(i < size)
+    {
+      Y = Y ::: List(dotProd(theta, X(i)))
+      i = i + 1
+    }
+    Y
   }
 
-  /*
-    SumOf(
-   */
   def PartialDerivs(distance: List[Double], X: Matrix, size: Int, num_features: Int): List[Double] = {
     var derivatives: Array[Double]  = Array.fill(num_features)(0)
     var i:Int = 0
     while(i < num_features){
       derivatives(i) = X(i).zip(distance).map{t:(Double, Double) => t._1 * t._2}.sum/size
-      //      derivatives(i) = X(i).sum * distance(i) / size
       i = i + 1
     }
-    //    println(distance)
     derivatives.toList
   }
-
 
   def PartialDerivativesAndCost(size: Int,theta: Row, X: Matrix,
                                 Y: Row, hypo: Row => Matrix => Row):(Double,Row)={
@@ -69,7 +56,7 @@ class Descent {
     (cost, partial_derive)
   }
 
-  def GradientDescent(i_var: Matrix, d_var: Row, size: Int, num_features: Int):List[Double] ={
+  def GradientDescent(i_var: Matrix, d_var: Row, size: Int, num_features: Int):Row ={
     var theta: Array[Double]  = Array.fill(num_features+1){0.0}
     var (cost_func_last: Double, num_iter, alpha, m) = (0.0, 0, 0.000000003, size)
     var index: Int = 0
@@ -101,40 +88,34 @@ class Descent {
     theta.toList
   }
 
-  def ScaleFeatures(i_var: Matrix, num_features: Int): Matrix = {
-    val i_var_without_header: Matrix = i_var.tail
-    var result: Matrix = List(List.fill(i_var.head.length)(1.0))
-    var i: Int = 0
-    while(i < num_features){
-      val avg: Double = i_var_without_header(i).sum / i_var_without_header(i).length
-      val range: Double = i_var_without_header(i).max - i_var_without_header(i).min
-      if(range != 0)
-        result = result ::: List(i_var_without_header(i).map(x => (x - avg)/range))
-      else
-        result = result ::: List(i_var_without_header(i).map((_ - avg)))
-      i = i + 1
-    }
-    result
-  }
-
-  def GetToWork() {
-    val size: Int = 300
-    val num_features: Int = 4
-    val (y: Row, x: Matrix) = GenerateTrainingSet(size, num_features)
-    println("------Y--------")
-    println(y)
-    println("------X--------")
-    println(x)
-    //        val scaledFeatures = ScaleFeatures(x.T, num_features)
-    val theta: List[Double] = GradientDescent(x, y, size, num_features)
-    println("Output")
-    println(theta)
-  }
+//  def ScaleFeatures(i_var: Matrix, num_features: Int): Matrix = {
+//    val i_var_without_header: Matrix = i_var.tail
+//    var result: Matrix = List(List.fill(i_var.head.length)(1.0))
+//    var i: Int = 0
+//    while(i < num_features){
+//      val avg: Double = i_var_without_header(i).sum / i_var_without_header(i).length
+//      val range: Double = i_var_without_header(i).max - i_var_without_header(i).min
+//      if(range != 0)
+//        result = result ::: List(i_var_without_header(i).map(x => (x - avg)/range))
+//      else
+//        result = result ::: List(i_var_without_header(i).map((_ - avg)))
+//      i = i + 1
+//    }
+//    result
+//  }
 }
 
 object Descent {
   def main(args: Array[String]) {
-    val starter = new Descent()
-    starter.GetToWork()
+    val starter = new GradientDescent()
+    val trainees = new TrainingDataGen()
+    val size: Int = 300
+    val num_features: Int = 1
+    val DataFrame: Matrix = trainees.GenerateTrainingSet(size, num_features)
+    println("------Y--------")
+    println(DataFrame.head)
+    println("------X--------")
+    println(DataFrame.tail)
+    starter.fit(DataFrame, size, num_features)
   }
 }
