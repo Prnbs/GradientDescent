@@ -35,7 +35,7 @@ class Descent {
   /*
     h(x) =  c + m1 x1 + m2 x2 + m3 x3 + ...
    */
-  def HypothesisLinear(theta: List[Double], X: Matrix, size: Int): List[Double] = {
+  def HypothesisLinear(size: Int, theta: Row, X: Matrix): Row = {
     GenerateDependentFeatures(size, X, theta)
   }
 
@@ -54,19 +54,17 @@ class Descent {
     derivatives.toList
   }
 
-  def PartialDerivativesAndCost(size: Int,theta: List[Double], X: Matrix,
-                                Y: List[Double]):(Double,List[Double])={
+
+  def PartialDerivativesAndCost(size: Int,theta: Row, X: Matrix,
+                                Y: Row, hypo: Row => Matrix => Row):(Double,Row)={
     //h(x) =  c + m1 x1 + m2 x2 + m3 x3 + ...
-    //size of hypothesis  list = size of data set
-    val hypothesis: List[Double] = HypothesisLinear(theta, X, size)
+    val hypothesis: List[Double] = hypo(theta)( X)
     //hypothesis(i) - y(i)
-    //size of distance = size of data set
     val distance: List[Double] = hypothesis.zip(Y).map{t:(Double, Double) => t._1 - t._2}
     // ((hypothesis(i) - y(i)) * (hypothesis(i) - y(i)) / 2 * m
     val costSquared = distance.map(scala.math.pow(_, 2))
     val cost: Double = costSquared.sum / (2 * size)
     // (hypothesis(i) - y(i)) * x(i)/m
-    //size of partial_derive list = number of features i.e. size of theta
     val partial_derive: List[Double] = PartialDerivs(distance, X.T, size, theta.length)
     (cost, partial_derive)
   }
@@ -76,10 +74,11 @@ class Descent {
     var (cost_func_last: Double, num_iter, alpha, m) = (0.0, 0, 0.000000003, size)
     var index: Int = 0
     var converged: Boolean = false
+    val funName = (HypothesisLinear (_, _,_)).curried
     while(!converged){
       num_iter += 1
       //get cost function and partial derivatives
-      val (cost_func, partial_derive) = PartialDerivativesAndCost(size, theta.toList, i_var, d_var)
+      val (cost_func, partial_derive) = PartialDerivativesAndCost(size, theta.toList, i_var, d_var, funName(size))
       index = index + 1
       //theta = theta_old - alpha * partial_derivative
       val zippedList  = theta.zip(partial_derive).toList
