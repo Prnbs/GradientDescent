@@ -64,7 +64,9 @@ class GradientDescent extends GradientDescentAPI{
     var index: Int = 0
     var converged: Boolean = false
     val funName = (HypothesisLinear (_, _,_)).curried
-    while(!converged){
+    val total_iter = 20
+    var currIter = 0
+    while( currIter < total_iter){
       num_iter += 1
       //get cost function and partial derivatives
       val (cost_func, partial_derive) = PartialDerivativesAndCost(size, Vector(theta.toList: _*).par, i_var, d_var, funName(size))
@@ -86,7 +88,10 @@ class GradientDescent extends GradientDescentAPI{
       if (cost_func < 0.0004)
         converged = true
       cost_func_last = cost_func
+      currIter += 1
+//      println(currIter)
     }
+    println(cost_func_last)
     Vector(theta.toList: _*).par
   }
 
@@ -112,7 +117,7 @@ object Descent {
     val starter = new GradientDescent()
     val trainees = new TrainingDataGen()
     val size: Int = 300
-    val num_features: Int = 4
+    val num_features: Int = 6
     val DataFrame: Matrix = trainees.GenerateTrainingSet(size, num_features)
     println("------Y--------")
     println(DataFrame.head)
