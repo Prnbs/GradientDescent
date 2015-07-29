@@ -11,12 +11,12 @@ class PostFix(input: String){
   val operator = new Stack[Char]()
   val operators: Set[Char] = Set('+', '*', '-', '(', ')', '/', '^')
   val precedence = Map( '^' -> 4,
-                        '*' -> 3,
-                        '/' -> 3,
-                        '+' -> 2,
-                        '-' -> 2,
-                        '(' -> 0,
-                        ')' -> 0)
+    '*' -> 3,
+    '/' -> 3,
+    '+' -> 2,
+    '-' -> 2,
+    '(' -> 0,
+    ')' -> 0)
 
   def in2post(input: String): String = {
     for(ch <- input) {

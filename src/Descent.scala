@@ -22,37 +22,37 @@ class GradientDescent extends GradientDescentAPI{
     h(x) =  c + m1 x1 + m2 x2 + m3 x3 + ...
    */
   def HypothesisLinear(size: Int, theta: Row, X: Matrix): Row = {
-    var Y: Row = List()
+    var Y: Row = Vector()
     var i: Int = 0
     while(i < size)
     {
-      Y = Y ::: List(dotProd(theta, X(i)))
+      Y = Y ++ Vector(dotProd(theta, X(i)))
       i = i + 1
     }
     Y
   }
 
-  def PartialDerivs(distance: List[Double], X: Matrix, size: Int, num_features: Int): List[Double] = {
+  def PartialDerivs(distance: Vector[Double], X: Matrix, size: Int, num_features: Int): Vector[Double] = {
     var derivatives: Array[Double]  = Array.fill(num_features)(0)
     var i:Int = 0
     while(i < num_features){
       derivatives(i) = X(i).zip(distance).map{t:(Double, Double) => t._1 * t._2}.sum/size
       i = i + 1
     }
-    derivatives.toList
+    derivatives.toVector
   }
 
   def PartialDerivativesAndCost(size: Int,theta: Row, X: Matrix,
                                 Y: Row, hypo: Row => Matrix => Row):(Double,Row)={
     //h(x) =  c + m1 x1 + m2 x2 + m3 x3 + ...
-    val hypothesis: List[Double] = hypo(theta)( X)
+    val hypothesis: Vector[Double] = hypo(theta)( X)
     //hypothesis(i) - y(i)
-    val distance: List[Double] = hypothesis.zip(Y).map{t:(Double, Double) => t._1 - t._2}
+    val distance: Vector[Double] = hypothesis.zip(Y).map{t:(Double, Double) => t._1 - t._2}
     // ((hypothesis(i) - y(i)) * (hypothesis(i) - y(i)) / 2 * m
     val costSquared = distance.map(scala.math.pow(_, 2))
     val cost: Double = costSquared.sum / (2 * size)
     // (hypothesis(i) - y(i)) * x(i)/m
-    val partial_derive: List[Double] = PartialDerivs(distance, X.T, size, theta.length)
+    val partial_derive: Vector[Double] = PartialDerivs(distance, X.T, size, theta.length)
     (cost, partial_derive)
   }
 
@@ -67,7 +67,7 @@ class GradientDescent extends GradientDescentAPI{
     while(currIter < totalIter){
       num_iter += 1
       //get cost function and partial derivatives
-      val (cost_func, partial_derive) = PartialDerivativesAndCost(size, theta.toList, i_var, d_var, funName(size))
+      val (cost_func, partial_derive) = PartialDerivativesAndCost(size, theta.toVector, i_var, d_var, funName(size))
       index = index + 1
       //theta = theta_old - alpha * partial_derivative
       val zippedList  = theta.zip(partial_derive).toList
@@ -86,7 +86,7 @@ class GradientDescent extends GradientDescentAPI{
       //      println(math.abs(cost_func - cost_func_last))
       currIter += 1
     }
-    theta.toList
+    theta.toVector
   }
 
 //  def ScaleFeatures(i_var: Matrix, num_features: Int): Matrix = {

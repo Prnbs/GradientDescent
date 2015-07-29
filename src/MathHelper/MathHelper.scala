@@ -4,13 +4,13 @@ package MathHelper
  * Created by Angeleyes on 7/20/2015.
  */
 import Classes.MathHelperTypedefs._
-import scala.collection.parallel.immutable.ParVector
+import scala.collection.immutable.Vector
 
 class MatrixImpl(m: Matrix){
   val data: Matrix = m
 
   def transpose(m: Matrix):Matrix =
-    if(m.head.isEmpty) ParVector()
+    if(m.head.isEmpty) Vector()
     else m.map(_.head) +: transpose(m.map(_.tail))
 
   def mXm( m1: Matrix, m2: Matrix ) =
