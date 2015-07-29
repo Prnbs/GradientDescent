@@ -49,9 +49,40 @@ class PostFix(){
     }
   }
 
+  def appendConcatRecursive(input: String, result: String): String = {
+    var tempResult = result
+    println(s"input = $input")
+    println(s"input result $result")
+    //terminating condition
+    if(input.length == 0) tempResult
+    else if(input.length == 1){
+      tempResult += input + "."
+    }
+    else if(input(0) == '('){
+      tempResult +=  "(" + input(1)
+      tempResult = appendConcatRecursive(input.slice(2, input.indexOf(')')), tempResult) + ")"
+      tempResult = appendConcatRecursive(input.slice(input.indexOf(')')+1, input.length), tempResult)
+    }
+    else if(unaryOperator.contains(input(0))){
+      tempResult += input(0) + "."
+      tempResult = appendConcatRecursive(input.slice(1, input.length), tempResult)
+    }
+    else if(!operators.contains(input(0)) && !unaryOperator.contains(input(1))){
+      tempResult += input(0) + "."
+      tempResult = appendConcatRecursive(input.slice(1, input.length), tempResult)
+    }
+    else if(unaryOperator.contains(input(1))){
+      tempResult += input(0)
+      tempResult = appendConcatRecursive(input.slice(1, input.length), tempResult)
+    }
+    println(s"result $tempResult")
+    tempResult
+  }
+
   def appendConcatOperator(input: String): String = {
     var result: String = input.head.toString
     var i = 1
+    println(s"input $input")
     val endConcat = if(result(0).isLetterOrDigit) true else false
     while(i < input.length-1){
       if(unaryOperator.contains(input(i)))
@@ -66,8 +97,10 @@ class PostFix(){
       }
       i += 1
     }
-    result += input(input.length-1)
+    if(input(input.length-1) != ')')
+      result += input(input.length-1)
     if(endConcat) result += "."
+    println(s"result $result")
     result
   }
 }
@@ -75,9 +108,11 @@ class PostFix(){
 object PostFix{
   def main(args: Array[String]) {
     val obj = new PostFix()
-    val str = obj.appendConcatOperator("a(bb)+a")
+    val input = "a(bb)+a(xxx)*"
+    var str = input.head.toString
+    str = obj.appendConcatRecursive(input.tail, str)
     println(str)
-    println(obj.in2post(str))
+//    println(obj.in2post(str))
   }
 
 }
