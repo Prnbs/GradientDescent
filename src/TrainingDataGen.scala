@@ -35,7 +35,7 @@ class TrainingDataGen extends TrainingDataAPI{
 
   def GenerateTrainingSet(size:Int, num_features: Int): Matrix = {
     val Xmat: Matrix = GenerateIndependentFeatures(size, num_features) T
-    //    val theta: Row = List.fill(num_features+1)(2)
+//        val theta: Row = List.fill(num_features+1)(2)
     val theta: Row = List.tabulate(num_features+1)(n => n + 2)
     val Ymat: Row = GenerateDependentFeatures(size, Xmat, theta)
     Ymat :: Xmat

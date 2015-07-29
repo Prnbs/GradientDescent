@@ -4,7 +4,7 @@ import Trainees.TrainingDataGen
 
 trait GradientDescentAPI{
   def fit(DataFrame: Matrix, size: Int, numFeatures: Int): Row
-  def predict(Input: Row, theta: Row): Double
+  def predict(Input: Matrix, theta: Row): Row
 }
 
 
@@ -14,8 +14,8 @@ class GradientDescent extends GradientDescentAPI{
     GradientDescent(DataFrame.tail, DataFrame.head, size, numFeatures)
   }
 
-  def predict(Input: Row, theta: Row): Double ={
-    dotProd(theta, Input)
+  def predict(Input: Matrix, theta: Row): Row ={
+    for(row <- Input) yield dotProd(theta, row)
   }
 
   /*
@@ -58,11 +58,13 @@ class GradientDescent extends GradientDescentAPI{
 
   def GradientDescent(i_var: Matrix, d_var: Row, size: Int, num_features: Int):Row ={
     var theta: Array[Double]  = Array.fill(num_features+1){0.0}
-    var (cost_func_last: Double, num_iter, alpha, m) = (0.0, 0, 0.000000003, size)
+    var (cost_func_last: Double, num_iter, alpha, m) = (0.0, 0, 0.000009, size)
     var index: Int = 0
     var converged: Boolean = false
     val funName = (HypothesisLinear (_, _,_)).curried
-    while(!converged){
+    val totalIter = 1000
+    var currIter = 0
+    while(currIter < totalIter){
       num_iter += 1
       //get cost function and partial derivatives
       val (cost_func, partial_derive) = PartialDerivativesAndCost(size, theta.toList, i_var, d_var, funName(size))
@@ -70,20 +72,19 @@ class GradientDescent extends GradientDescentAPI{
       //theta = theta_old - alpha * partial_derivative
       val zippedList  = theta.zip(partial_derive).toList
       theta = zippedList.map{t: (Double, Double) => t._1 - (alpha * t._2)}.toArray
-      //      theta(0) = zippedList.head._1 - (alpha * 10 * zippedList.head._2)
-      //      theta(1) = zippedList.head._1 - (alpha * zippedList.head._2)
-      //      theta(2) = zippedList.head._1 - (alpha * 0.01 * zippedList.head._2)
-      //      theta(3) = zippedList.head._1 - (alpha * 0.001 * zippedList.head._2)
-      //      theta(4) = zippedList.head._1 - (alpha * 0.0001 * zippedList.head._2)
-      println(theta.toList)
-      println("-------")
-      println(cost_func)
-      if(cost_func > cost_func_last)
-        alpha = alpha / 10
-      if (cost_func < 0.000001)
-        converged = true
+      theta(0) = zippedList.head._1 - (alpha *10 * zippedList.head._2)
+//      println(theta.toList)
+//      println("-------")
+//      println(cost_func)
+      if(cost_func > cost_func_last) {
+        alpha = alpha / 2
+        println("Cost overshot, alpha was reduced")
+      }
+//      if (cost_func < 0.000001)
+//        converged = true
       cost_func_last = cost_func
       //      println(math.abs(cost_func - cost_func_last))
+      currIter += 1
     }
     theta.toList
   }
@@ -110,12 +111,16 @@ object Descent {
     val starter = new GradientDescent()
     val trainees = new TrainingDataGen()
     val size: Int = 300
-    val num_features: Int = 1
+    val num_features: Int = 10
     val DataFrame: Matrix = trainees.GenerateTrainingSet(size, num_features)
     println("------Y--------")
     println(DataFrame.head)
     println("------X--------")
     println(DataFrame.tail)
-    starter.fit(DataFrame, size, num_features)
+    val t0 = System.currentTimeMillis()
+    val theta = starter.fit(DataFrame, size, num_features)
+    val t1 = System.currentTimeMillis()
+    println("Elapsed time: " + (t1 - t0) + "ms")
+    println(starter.predict(DataFrame.tail, theta))
   }
 }
