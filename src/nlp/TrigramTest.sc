@@ -3,7 +3,8 @@ var first = line.split(" ")
 var second = first.tail
 var third = second.tail
 var tri = (first zip second zip third)
-var fram = tri..map{((x,y),z) => (x, y, z)}
+var gram = tri.map{
+  case ((x,y),z) => (x + " " + y  + " " + z)}
 
 
 
