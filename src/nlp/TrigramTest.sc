@@ -1,16 +1,23 @@
-var line = "Finally if you are thinking of using synchronized collections you may also wish to consider the concurrent collections of java util concurrent instead."
-var first = line.split(" ")
-var second = first.tail
-var third = second.tail
-var tri = (first zip second zip third)
-var gram = tri.map{
-  case ((x,y),z) => (x + " " + y  + " " + z)}
+3 + 3
+val dim = 5
+var a = Array.ofDim[Int](dim, dim)
+for(i <- 0 until dim){
+  for(j<- 0 until dim){
+    a(i)(j) = 90
+  }
+}
+
+for(i <- 0 until dim){
+  a(i)(0) = i
+  a(0)(i) = i
+}
 
 
+for(i <- 0 until dim){
+  for(j<- 0 until dim) {
+    print(a(i)(j) + " ")
+  }
+  println
+  }
 
 
-
-
-
-
-//var third = second.tail
