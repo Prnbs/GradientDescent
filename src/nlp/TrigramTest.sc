@@ -1,23 +1,57 @@
-3 + 3
-val dim = 5
-var a = Array.ofDim[Int](dim, dim)
-for(i <- 0 until dim){
-  for(j<- 0 until dim){
-    a(i)(j) = 90
-  }
-}
 
-for(i <- 0 until dim){
-  a(i)(0) = i
-  a(0)(i) = i
-}
+val zer = "0"
+val one = "1"
+val coll = List("0", "1")
+zer*4+one*2+zer*2
+coll((Math.random()*10).toInt%2)+coll((Math.random()*10).toInt%2)+coll((Math.random()*10).toInt%2)+coll((Math.random()*10).toInt%2)+coll((Math.random()*10).toInt%2)+coll((Math.random()*10).toInt%2)+coll((Math.random()*10).toInt%2)
+(Math.random()*10).toInt%4
 
 
-for(i <- 0 until dim){
-  for(j<- 0 until dim) {
-    print(a(i)(j) + " ")
-  }
-  println
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
