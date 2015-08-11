@@ -1,6 +1,6 @@
 package nlp.genetic
 
-import scala.collection.mutable.Stack
+import scala.collection.mutable.{ListBuffer, Stack}
 
 /**
  * Created by psinha4 on 8/7/2015.
@@ -9,7 +9,8 @@ class NumberSolver {
 
   var answer = new Stack[Float]()
   var operator = new Stack[Char]()
-//  var population = new Vector[String]()
+  var weights = new ListBuffer[Float]()
+  var chromosomes = new ListBuffer[String]()
 
   def encode(character: Char): String ={
     character match{
@@ -110,7 +111,14 @@ class NumberSolver {
 
   def populateRandomPopulation(size: Int):Unit = {
     for(i <- 1 to size){
-
+      val input = getRandomString()
+      val result = computeResult(createChromosome(input))
+      if(result != Float.NegativeInfinity && result != Float.PositiveInfinity && !(result equals( Float.NaN)))
+      {
+        chromosomes += input
+        weights  += result
+//        println(result)
+      }
     }
   }
 
@@ -128,19 +136,47 @@ class NumberSolver {
     }
     result.take(result.length-1)
   }
+
+  /**
+   * Taken from wikipedia : https://en.wikipedia.org/wiki/Fitness_proportionate_selection#Java_-_linear_O.28n.29_version
+   *
+   * @return the index in weights Array which the roulette wheel stops at
+   */
+  def rouletteSelect(): Int = {
+    val sumOfWeight = weights.sum
+    //get a random value
+    var randValue = Math.random() * sumOfWeight
+    println(randValue)
+    for(i <- 0 to weights.length-1){
+      randValue -= weights(i)
+      if(randValue <= 0) return i
+    }
+    return weights.length-1
+  }
+
+  def removeSeletedChromosome(index: Int): Unit = {
+    chromosomes.remove(index)
+    weights.remove(index)
+  }
+
+  def selectTwoMembers():Unit = {
+    val firstMember = rouletteSelect()
+    removeSeletedChromosome(firstMember)
+    val secondMember = rouletteSelect()
+    println(s"firstMember = $firstMember, secondMember = $secondMember ")
+
+  }
+
+
 }
 
 object NumberSolver{
   def main(args: Array[String]) {
     val solver = new NumberSolver()
-    val defective = -9999999.0f
-    for(i <- 1 to 10) {
-      val input = solver.getRandomString()
-      println(input)
-
-      val result = solver.computeResult(solver.createChromosome(input))
-      if(result != defective)
-        println(result)
-    }
+    solver.populateRandomPopulation(10000)
+//    val t = solver.rouletteSelect()
+//    println(solver.chromosomes(t))
+//    println(solver.weights(t))
+    solver.selectTwoMembers()
   }
 }
