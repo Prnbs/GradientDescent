@@ -1,6 +1,7 @@
 package nlp.genetic
 
 import scala.collection.mutable.{ListBuffer, Stack}
+import scala.util.Try
 
 /**
  * Created by psinha4 on 8/7/2015.
@@ -9,8 +10,10 @@ class NumberSolver {
 
   var answer = new Stack[Float]()
   var operator = new Stack[Char]()
-  var weights = new ListBuffer[Float]()
+  var fitness = new ListBuffer[Float]()
   var chromosomes = new ListBuffer[String]()
+  val target = 1000
+  val defective = -9999999.0f
 
   def encode(character: Char): String ={
     character match{
@@ -63,9 +66,14 @@ class NumberSolver {
     result
   }
 
+  /**
+   *
+   * @param Inputs a bytecode
+   * @return
+   */
   def computeResult(input: String): Float = {
     var data = input
-    val defective = -9999999.0f
+
     var decodedString = ""
     //decode the bit field to a string of numbers and operators
     while(data.length != 0){
@@ -109,6 +117,10 @@ class NumberSolver {
     answer.pop
   }
 
+  /**
+   * Creates a list of N chromosomes and also calculates their fitness
+   * @param size
+   */
   def populateRandomPopulation(size: Int):Unit = {
     for(i <- 1 to size){
       val input = getRandomString()
@@ -116,14 +128,21 @@ class NumberSolver {
       if(result != Float.NegativeInfinity && result != Float.PositiveInfinity && !(result equals( Float.NaN)))
       {
         chromosomes += input
-        weights  += result
-//        println(result)
+        fitness  += calculateFitness(result.toInt)
       }
     }
   }
 
+  def calculateFitness(result: Float): Float = {
+      val diff = (target - result)
+      if(diff == 0){
+        println("Match!!")
+      }
+      Try(1 / diff).getOrElse(target)
+  }
+
   /**
-   * Create a random chromosome
+   * Create a random chromosome which is valid
    * @return
    */
   def getRandomString():String = {
@@ -143,30 +162,51 @@ class NumberSolver {
    * @return the index in weights Array which the roulette wheel stops at
    */
   def rouletteSelect(): Int = {
-    val sumOfWeight = weights.sum
+    val sumOfWeight = fitness.sum
     //get a random value
     var randValue = Math.random() * sumOfWeight
-    println(randValue)
-    for(i <- 0 to weights.length-1){
-      randValue -= weights(i)
+//    println(s"sumOfWeight = $sumOfWeight")
+    for(i <- 0 to fitness.length-1){
+      randValue -= fitness(i)
       if(randValue <= 0) return i
     }
-    return weights.length-1
+    return fitness.length-1
   }
 
   def removeSeletedChromosome(index: Int): Unit = {
     chromosomes.remove(index)
-    weights.remove(index)
+    fitness.remove(index)
   }
 
-  def selectTwoMembers():Unit = {
+  /**
+   * Selects two memebrs from list of chromosemes based on roulette selection and deletes them from the chromosomes list
+   */
+  def createTwoChildren():Unit = {
     val firstMember = rouletteSelect()
+    val father = chromosomes(firstMember)
     removeSeletedChromosome(firstMember)
     val secondMember = rouletteSelect()
-    println(s"firstMember = $firstMember, secondMember = $secondMember ")
-
+    val mother = chromosomes(secondMember)
+    removeSeletedChromosome(secondMember)
+    createChildren(father, mother)
   }
 
+  def createChildren(father: String, mother: String): Unit = {
+    val maxLength = Math.max(father.length, mother.length)
+    val crossOverAt = (Math.random()* maxLength).toInt
+    val child1 = father.take(crossOverAt) + mother.takeRight(mother.length - crossOverAt)
+    val child2 = mother.take(crossOverAt) + father.takeRight(father.length - crossOverAt)
+    val value1 =  computeResult(createChromosome(child1))
+    if(defective != value1){
+      chromosomes += child1
+      fitness += calculateFitness(value1.toFloat)
+    }
+    val value2 =  computeResult(createChromosome(child2))
+    if(defective != value2){
+      chromosomes += child2
+      fitness += calculateFitness(value2.toFloat)
+    }
+  }
 
 }
 
@@ -174,9 +214,8 @@ object NumberSolver{
   def main(args: Array[String]) {
     val solver = new NumberSolver()
     solver.populateRandomPopulation(10000)
-//    val t = solver.rouletteSelect()
-//    println(solver.chromosomes(t))
-//    println(solver.weights(t))
-    solver.selectTwoMembers()
+    for(i <- 0 to 100000)
+      solver.createTwoChildren()
+    println("End!")
   }
 }
